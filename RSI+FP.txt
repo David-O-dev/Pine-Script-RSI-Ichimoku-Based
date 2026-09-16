@@ -1,0 +1,215 @@
+// This Pine Script® code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © Gradation0
+
+//@version=6
+indicator(title = "RSI + FP", shorttitle = "RSI + FP", overlay = true, precision = 5, format = format.price)
+
+rsi1Length = input.int(defval = 7, title = "RSI 1 Line", group = "RSI")
+rsi2Length = input.int(defval = 9, title = "RSI 2 Line", group = "RSI")
+rsi3Length = input.int(defval = 12, title = "RSI 3 Line", group = "RSI")
+
+RSI1 = request.security(syminfo.tickerid, "3", ta.rsi(close, rsi1Length))
+RSI2 = request.security(syminfo.tickerid, "3", ta.rsi(close, rsi2Length))
+RSI3 = request.security(syminfo.tickerid, "3", ta.rsi(close, rsi3Length))
+
+RSI4 = request.security(syminfo.tickerid, "5", ta.rsi(close, rsi1Length))
+RSI5 = request.security(syminfo.tickerid, "5", ta.rsi(close, rsi2Length))
+RSI6 = request.security(syminfo.tickerid, "5", ta.rsi(close, rsi3Length))
+
+// RSI7 = request.security(syminfo.tickerid, "10", ta.rsi(close, rsi1Length))
+// RSI8 = request.security(syminfo.tickerid, "10", ta.rsi(close, rsi2Length))
+// RSI9 = request.security(syminfo.tickerid, "10", ta.rsi(close, rsi3Length))
+
+var bool Min3Up = false
+var bool Min3Down = false
+//Long 3
+if RSI1 > 55 and RSI2 > 55 and RSI3 > 55 and RSI1 > RSI2 and RSI2 > RSI3
+    Min3Up := true
+    Min3Down := false
+
+//Short 3
+else if RSI1 < 45 and RSI2 < 45 and RSI3 < 45 and RSI1 < RSI2 and RSI2 < RSI3
+    Min3Down := true
+    Min3Up := false
+
+else
+    Min3Up := false
+    Min3Down := false
+
+var bool Min5Up = false
+var bool Min5Down = false
+//Long 5
+if RSI4 > 55 and RSI5 > 55 and RSI4 > RSI5 and RSI5 > RSI6
+    Min5Up := true
+    Min5Down := false
+
+//Short 5
+else if RSI4 < 45 and RSI5 < 45 and RSI4 < RSI5 and RSI5 < RSI6
+    Min5Down := true
+    Min5Up := false
+
+else
+    Min5Up := false
+    Min5Down := false
+
+
+// var bool Min10Up = false
+// var bool Min10Down = false
+// //Long 10
+// if RSI7 > 55 and RSI7 > RSI8 and RSI8 > RSI9
+//     Min10Up := true
+//     Min10Down := false
+
+// //Short 10
+// else if RSI7 < 45 and RSI7 < RSI8 and RSI8 < RSI9
+//     Min10Down := true
+//     Min10Up := false
+
+// else
+//     Min10Up := false
+//     Min10Down := false
+
+//EMAs
+//EMA 1
+EMA1Length = input.int(defval = 5, title = "EMA1", group = "EMA Length")
+ColorForBBM1 = input.color(defval = color.rgb(139, 60, 6), title = "EMA 1", group = "BBEMA Color Control")
+middle1 = request.security(syminfo.tickerid, "3", ta.ema(close, EMA1Length))
+// plot(middle1, color = ColorForBBM1, title = "EMA 1 Line", linewidth = 2)
+BBM1Price = middle1
+
+//EMA 2
+EMA2Length = input.int(defval = 7, title = "EMA2", group = "EMA Length")
+ColorForBBM2 = input.color(defval = color.rgb(97, 97, 97), title = "EMA 2", group = "BBEMA Color Control")
+middle2 = request.security(syminfo.tickerid, "3", ta.ema(close, EMA2Length))
+// plot(middle2, color = ColorForBBM2, title = "EMA 2 Line", linewidth = 2)
+BBM2Price = middle2
+
+//EMA 3
+EMA3Length = input.int(defval = 9, title = "EMA3", group = "EMA Length")
+ColorForBBM3 = input.color(defval = color.rgb(243, 144, 13), title = "EMA 3", group = "BBEMA Color Control")
+middle3  = request.security(syminfo.tickerid, "3", ta.ema(close, EMA3Length))
+// plot(middle3, color = ColorForBBM3, title = "EMA 3 Line", linewidth = 2)
+BBM3Price = middle3
+
+//EMA 4
+EMA4Length = input.int(defval = 20, title = "EMA4", group = "EMA Length")
+ColorForBBM4 = input.color(defval = color.rgb(31, 151, 15), title = "EMA 4", group = "BBEMA Color Control")
+middle4  = request.security(syminfo.tickerid, "3", ta.ema(close, EMA4Length))
+// plot(middle4, color = ColorForBBM4, title = "EMA 4 Line", linewidth = 2)
+BBM4Price = middle4
+
+//EMA 5
+EMA5Length = input.int(defval = 3, title = "EMA5", group = "EMA Length")
+ColorForBBM5 = input.color(defval = color.rgb(16, 71, 255), title = "EMA 5", group = "BBEMA Color Control")
+middle5  = request.security(syminfo.tickerid, "3", ta.ema(close, EMA5Length))
+// plot(middle5, color = ColorForBBM5, title = "EMA 5 Line", linewidth = 2)
+BBM5Price = middle5
+
+//이치모쿠
+conversionPeriods = input.int(7, minval=1, title="Conversion Line Length")
+basePeriods = input.int(26, minval=1, title="Base Line Length")
+laggingSpan2Periods = input.int(52, minval=1, title="Leading Span B Length")
+displacement = input.int(26, minval=1, title="Lagging Span")
+donchian(len) => math.avg(ta.lowest(len), ta.highest(len))
+conversionLine = donchian(conversionPeriods)
+baseLine = donchian(basePeriods)
+leadLine1 = math.avg(conversionLine, baseLine)
+leadLine2 = donchian(laggingSpan2Periods)
+plot(conversionLine, color=color.rgb(69, 214, 250), title="Conversion Line", linewidth = 3)
+// plot(baseLine, color=#B71C1C, title="Base Line")
+// plot(close, offset = -displacement + 1, color=color.rgb(173, 19, 166), title="Lagging Span")
+// p1 = plot(leadLine1, offset = displacement - 1, color=#A5D6A7,
+// 	 title="Leading Span A")
+// p2 = plot(leadLine2, offset = displacement - 1, color=#EF9A9A,
+// 	 title="Leading Span B")
+// plot(leadLine1 > leadLine2 ? leadLine1 : leadLine2, offset = displacement - 1, title = "Kumo Cloud Upper Line", display = display.none) 
+// plot(leadLine1 < leadLine2 ? leadLine1 : leadLine2, offset = displacement - 1, title = "Kumo Cloud Lower Line", display = display.none) 
+// fill(p1, p2, color = leadLine1 > leadLine2 ? color.rgb(67, 160, 72, 51) : color.rgb(244, 67, 54, 49))
+
+//이평선 크로스
+//long
+var bool BBM5CrossUp = false //3
+var bool BBM1CrossUp = false //5
+var bool BBM2CrossUp = false //7
+var bool BBM3CrossUp = false //10
+if BBM1Price[1] < BBM4Price[1] and BBM1Price[0] > BBM4Price[0]
+    BBM1CrossUp := true
+    BBM2CrossUp := false
+    BBM3CrossUp := false
+    BBM5CrossUp := false
+
+else if BBM2Price[1] < BBM4Price[1] and BBM2Price[0] > BBM4Price[0]
+    BBM1CrossUp := false
+    BBM2CrossUp := true
+    BBM3CrossUp := false
+    BBM5CrossUp := false
+
+else if BBM3Price[1] < BBM4Price[1] and BBM3Price[0] > BBM4Price[0]
+    BBM1CrossUp := false
+    BBM2CrossUp := false
+    BBM3CrossUp := true
+    BBM5CrossUp := false
+
+else if BBM5Price[1] < BBM4Price[1] and BBM5Price[0] > BBM4Price[0]
+    BBM1CrossUp := false
+    BBM2CrossUp := false
+    BBM3CrossUp := false
+    BBM5CrossUp := true
+
+else
+    BBM1CrossUp := false
+    BBM2CrossUp := false
+    BBM3CrossUp := false
+    BBM5CrossUp := false
+
+//short
+var bool BBM5CrossDown = false //3
+var bool BBM1CrossDown = false //5
+var bool BBM2CrossDown = false //7
+var bool BBM3CrossDown = false //10
+if BBM1Price[1] > BBM4Price[1] and BBM1Price[0] < BBM4Price[0]
+    BBM1CrossDown := true
+    BBM2CrossDown := false
+    BBM3CrossDown := false
+    BBM5CrossDown := false
+
+else if BBM2Price[1] > BBM4Price[1] and BBM2Price[0] < BBM4Price[0]
+    BBM1CrossDown := false
+    BBM2CrossDown := true
+    BBM3CrossDown := false
+    BBM5CrossDown := false
+
+else if BBM3Price[1] > BBM4Price[1] and BBM3Price[0] < BBM4Price[0]
+    BBM1CrossDown := false
+    BBM2CrossDown := false
+    BBM3CrossDown := true
+    BBM5CrossDown := false
+
+else if BBM5Price[1] > BBM4Price[1] and BBM5Price[0] < BBM4Price[0]
+    BBM1CrossDown := false
+    BBM2CrossDown := false
+    BBM3CrossDown := false
+    BBM5CrossDown := true
+
+else
+    BBM1CrossDown := false
+    BBM2CrossDown := false
+    BBM3CrossDown := false
+    BBM5CrossDown := false
+
+
+//Long Short Check
+if Min3Up == true and Min5Up == true and conversionLine[1] < conversionLine[0]
+    if BBM1CrossUp == true or BBM2CrossUp ==  true or BBM3CrossUp == true or BBM5CrossUp == true
+        if timeframe.period == "3"
+            label.new(bar_index, high, "Long", color = color.blue, size = size.small)
+
+else if Min3Down == true and Min5Down == true and conversionLine[1] > conversionLine[0]
+    if BBM1CrossDown == true or BBM2CrossDown == true or BBM3CrossDown == true or BBM5CrossDown == true
+        if timeframe.period == "3"
+            label.new(bar_index, high, "Short", color = color.red, size = size.small)
+            
+        
+    
+
+// and Min10Up == true and Min10Down == true
