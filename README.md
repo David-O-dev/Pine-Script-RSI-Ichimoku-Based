@@ -9,4 +9,5 @@ Indicator based on RSI and conversion line from Ichimoku. Signals entry for long
 --
 
 ## Motivation & Problem
-- Market Noise & False signals: 
+- **Market Noise & False signals**: The previous indicator yielded unstable and inaccurate results due to a lack of ability to check for the complete conversion of trend.
+- The Core
