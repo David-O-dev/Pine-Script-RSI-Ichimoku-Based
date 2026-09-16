@@ -5,3 +5,8 @@ Indicator based on RSI and conversion line from Ichimoku. Signals entry for long
 
 ## Chart Preview
 ![Indicator Preview](RSI+FP-ss.png)
+
+--
+
+## Motivation & Problem
+- Market Noise & False signals: 
